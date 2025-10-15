@@ -13,7 +13,6 @@ class Query:
                 id=user.id, 
                 display_name=user.display_name, 
                 username=user.username, 
-                profile_picture_url=user.profile_picture_url  
             ) for user in users
         ]
 
@@ -25,7 +24,19 @@ class Query:
                 id=user.id, 
                 display_name=user.display_name, 
                 username=user.username, 
-                profile_picture_url=user.profile_picture_url 
+            )
+        return None
+    
+    @strawberry.field
+    def check_my_status(self, user_id: int) -> Optional[UserType]:
+        user = UserGateway.get_user_by_id(user_id)
+        if user:
+            return UserType(
+                id=user.id,
+                display_name=user.display_name,
+                username=user.username,
+                role=user.role.value, # แปลง enum เป็น string
+                tier=user.tier.value, # แปลง enum เป็น string
             )
         return None
     

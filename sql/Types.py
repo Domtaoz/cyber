@@ -1,20 +1,23 @@
+# Types.py
 import strawberry
-from datetime import date, time
-from typing import List, Optional
+from typing import Optional
 
+# ✅ New: เพิ่ม field ใหม่ๆ
 @strawberry.type
 class UserType:
     id: int
     display_name: str
     username: str
-    profile_picture_url: str
-    request_sent: bool = False
-    request_received: bool = False
-    is_friend: bool = False
-    
+    role: str  # ส่งเป็น string
+    tier: str  # ส่งเป็น string
+
 @strawberry.type
 class LoginResponse:
     success: bool
     message: str
     user: Optional[UserType]
 
+@strawberry.type
+class StatusResponse:
+    success: bool
+    message: str

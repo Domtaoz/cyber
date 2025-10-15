@@ -12,7 +12,7 @@ const RegisterScreen = ({ navigation }) => {
     // ✅ 2. สร้าง GraphQL Mutation string
     const ADD_USER_MUTATION = `
         mutation AddUser($displayName: String!, $username: String!, $password: String!) {
-            addUser(displayName: $displayName, username: $username, password: $password) {
+            registerCustomer(displayName: $displayName, username: $username, password: $password) {
                 id
                 username
                 displayName

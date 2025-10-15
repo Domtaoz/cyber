@@ -1,0 +1,1 @@
+pip install fastapi uvicorn sqlalchemy mysql-connector-python strawberry-graphql bcrypt python-dotenv

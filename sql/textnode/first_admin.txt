@@ -1,0 +1,19 @@
+INSERT INTO users (
+    display_name, 
+    username, 
+    email, 
+    password, 
+    role, 
+    tier, 
+    password_updated_at, 
+    created_at
+) VALUES (
+    'Default Admin',
+    'admin',
+    'admin@yourapp.com',
+    '$2b$12$Ea.gL2GLS2m25Gv2TViVn.Y9oRN33OMsML4FEqAFk7fjsY5W/a02S', -- นี่คือ hash ของ 'AdminPassword123!'
+    'ADMIN',
+    'PENDING',
+    NOW(),
+    NOW()
+);
