@@ -1,0 +1,2 @@
+npm install expo
+npx expo install @react-navigation/native @react-navigation/stack axios react-native-screens react-native-safe-area-context
