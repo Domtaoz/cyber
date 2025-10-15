@@ -1,0 +1,65 @@
+query {
+  getUsers {
+    id
+    displayName
+    username
+    profilePictureUrl
+  }
+}
+
+query {
+  getUserById(id: 1) {
+    id
+    displayName
+    username
+    profilePictureUrl
+  }
+}
+
+mutation {
+  addUser(displayName: "Alice", username: "alice123", password: "1234") {
+    id
+    displayName
+    username
+    profilePictureUrl
+  }
+}
+
+mutation {
+  updateUser(id: 1, displayName: "Alice Updated", username: "alice_new", password: "4321") {
+    id
+    displayName
+    username
+    profilePictureUrl
+  }
+}
+
+mutation {
+  updateUserAvatar(id: 1, profilePictureUrl: "https://example.com/new_avatar.jpg") {
+    id
+    displayName
+    username
+    profilePictureUrl
+  }
+}
+
+mutation {
+  deleteUser(id: 1)
+}
+
+mutation {
+  loginUser(username: "alice123", password: "1234") {
+    success
+    message
+    user {
+      id
+      displayName
+      username
+      profilePictureUrl
+    }
+  }
+}
+
+mutation {
+  logoutUser
+}

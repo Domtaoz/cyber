@@ -1,0 +1,7 @@
+notepad C:\Windows\System32\drivers\etc\hosts
+
+192.168.56.1 s.com
+
+10.6.38.161 s.com
+
+172.20.10.4 s.com

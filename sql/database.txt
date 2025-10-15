@@ -1,0 +1,11 @@
+CREATE TABLE users (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,  
+    display_name VARCHAR(255),  
+    username VARCHAR(191) NOT NULL UNIQUE,  
+    password CHAR(60) NOT NULL, 
+    password_updated_at DATETIME NOT NULL,
+    reset_token VARCHAR(100) DEFAULT NULL,
+    reset_token_expiry DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    profile_picture_url VARCHAR(500) DEFAULT NULL
+);
