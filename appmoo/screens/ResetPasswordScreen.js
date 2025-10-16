@@ -9,7 +9,7 @@ const ResetPasswordScreen = ({ route, navigation }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { token } = route.params; // รับ token มาจากหน้าก่อน
+    const { token } = route.params; 
 
     const RESET_PASSWORD_MUTATION = `
         mutation ResetPassword($token: String!, $newPassword: String!) {

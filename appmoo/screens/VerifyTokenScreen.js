@@ -6,7 +6,7 @@ import { postQuery } from '../api/client';
 const VerifyTokenScreen = ({ route, navigation }) => {
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
-    const { email } = route.params; // รับ email มาจากหน้าก่อน
+    const { email } = route.params; 
 
     const VERIFY_TOKEN_MUTATION = `
         mutation VerifyResetToken($token: String!) {
@@ -28,7 +28,6 @@ const VerifyTokenScreen = ({ route, navigation }) => {
             const response = result.data.verifyResetToken;
 
             if (response.success) {
-                // ✅ ถ้ายืนยันสำเร็จ ไปหน้าตั้งรหัสใหม่ พร้อมส่ง token ไปด้วย
                 navigation.navigate('ResetPassword', { token: token.toUpperCase() });
             } else {
                 throw new Error(response.message);

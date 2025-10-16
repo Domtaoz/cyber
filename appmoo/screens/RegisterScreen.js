@@ -4,13 +4,11 @@ import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Alert, Act
 import { postQuery } from '../api/client';
 
 const validateEmail = (email) => {
-    // Regular Expression สำหรับตรวจสอบรูปแบบอีเมลพื้นฐาน
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
 };
 
 const RegisterScreen = ({ navigation }) => {
-    // ✅ Changed: ลบ displayName, เพิ่ม email
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,7 +18,6 @@ const RegisterScreen = ({ navigation }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
-    // ✅ Changed: อัปเดต Mutation ให้ถูกต้อง
     const REGISTER_CUSTOMER_MUTATION = `
         mutation RegisterCustomer($username: String!, $email: String!, $password: String!) {
             registerCustomer(username: $username, email: $email, password: $password) {
@@ -35,10 +32,9 @@ const RegisterScreen = ({ navigation }) => {
     `;
 
     const handleRegister = async () => {
-        // ✅ Changed: ตรวจสอบ field ทั้งหมด
         if (password !== confirmPassword) {
             Alert.alert('Registration Failed', 'Passwords do not match.');
-            return; // หยุดการทำงานทันที
+            return;
         }
         
         if (!username || !email || !password) {
@@ -48,13 +44,12 @@ const RegisterScreen = ({ navigation }) => {
 
         if (!validateEmail(email)) {
             Alert.alert('Invalid Email', 'Please enter a valid email address.');
-            return; // หยุดการทำงานถ้าอีเมลไม่ถูกต้อง
+            return; 
         }
 
         setLoading(true);
 
         try {
-            // ✅ Changed: ส่งตัวแปรให้ครบ
             const result = await postQuery(REGISTER_CUSTOMER_MUTATION, {
                 username,
                 email,
@@ -85,7 +80,6 @@ const RegisterScreen = ({ navigation }) => {
         <View style={styles.container}>
             <Text style={styles.title}>Create Account</Text>
 
-            {/* ❌ ลบช่อง Display Name */}
             <TextInput
                 style={styles.input}
                 placeholder="Username"
@@ -94,7 +88,6 @@ const RegisterScreen = ({ navigation }) => {
                 autoCapitalize="none"
             />
             
-            {/* ✅ เพิ่มช่อง Email */}
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -120,7 +113,6 @@ const RegisterScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             
-            {/* ✅ 3. สร้าง View ครอบช่อง Confirm Password */}
             <View style={styles.passwordContainer}>
                 <TextInput
                     style={styles.passwordInput}

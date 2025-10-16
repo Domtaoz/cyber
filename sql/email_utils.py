@@ -1,4 +1,3 @@
-# email_utils.py
 import smtplib
 from email.message import EmailMessage
 import os
@@ -9,7 +8,6 @@ load_dotenv()
 GMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 GMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
-# 🔄 อัปเดตฟังก์ชันนี้
 def send_reset_email(recipient_email: str, token: str):
     if not GMAIL_ADDRESS or not GMAIL_PASSWORD:
         print("ERROR: Email credentials not set in .env file.")
@@ -20,7 +18,6 @@ def send_reset_email(recipient_email: str, token: str):
     msg['From'] = GMAIL_ADDRESS
     msg['To'] = recipient_email
     
-    # ✅ เปลี่ยนเนื้อหาอีเมล
     msg.set_content(f"""
     Hello,
 

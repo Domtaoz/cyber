@@ -5,6 +5,14 @@ import { postQuery } from './api/client';
 
 export const AuthContext = createContext();
 
+export class PasswordExpiredError extends Error {
+  constructor(message, user) {
+    super(message);
+    this.name = 'PasswordExpiredError';
+    this.user = user; 
+  }
+}
+
 export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [userToken, setUserToken] = useState(null);
@@ -12,35 +20,37 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (loginIdentifier, password) => {
         setIsLoading(true);
-        // ✅ Changed: อัปเดต Mutation ให้ตรงกับ Backend ล่าสุด
         const LOGIN_MUTATION = `
             mutation LoginUser($loginIdentifier: String!, $password: String!) {
                 loginUser(loginIdentifier: $loginIdentifier, password: $password) {
                     success
                     message
+                    passwordExpired 
                     user {
                         id
                         username
+                        email
                         role
                         tier
                     }
                 }
             }
         `;
-        try {
-            const result = await postQuery(LOGIN_MUTATION, { loginIdentifier, password });
-            const response = result.data.loginUser;
 
-            if (response.success) {
-                setUserInfo(response.user);
-                setUserToken('dummy-token'); // ในระบบจริงควรใช้ JWT
-                await AsyncStorage.setItem('userInfo', JSON.stringify(response.user));
-                await AsyncStorage.setItem('userToken', 'dummy-token');
-            } else {
-                throw new Error(response.message);
-            }
-        } finally {
-            setIsLoading(false);
+        const result = await postQuery(LOGIN_MUTATION, { loginIdentifier, password });
+        const response = result.data.loginUser;
+
+        if (response.passwordExpired) {
+            throw new PasswordExpiredError(response.message, response.user);
+        }
+
+        if (response.success) {
+            setUserInfo(response.user);
+            setUserToken('dummy-token');
+            await AsyncStorage.setItem('userInfo', JSON.stringify(response.user));
+            await AsyncStorage.setItem('userToken', 'dummy-token');
+        } else {
+            throw new Error(response.message);
         }
     };
 

@@ -7,7 +7,6 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { AuthContext } from './AuthContext';
 
-// Import all screens
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import WaitingScreen from './screens/WaitingScreen';
@@ -75,7 +74,6 @@ const AppNavigator = () => {
                 );
 
             default:
-                // Fallback to login if something is wrong
                 return <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />;
         }
     };

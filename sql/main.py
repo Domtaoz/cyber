@@ -28,7 +28,6 @@ graphql_app = GraphQLRouter(schema)
 app.include_router(graphql_app, prefix="/graphql")
 
 def run():
-    # ✅ เรียกใช้ฟังก์ชันจากคลาส Config โดยตรง
     server_config = Config.load_server_config()
     host_ip = get_local_ip()
     

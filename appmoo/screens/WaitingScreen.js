@@ -6,13 +6,11 @@ const WaitingScreen = () => {
     const { checkStatus, userInfo, logout } = useContext(AuthContext);
 
     useEffect(() => {
-        // Polling: เช็คสถานะทุก 5 วินาที
         const interval = setInterval(() => {
             console.log('Checking user status...');
             checkStatus();
         }, 5000);
 
-        // Clear interval เมื่อ component ถูก unmount (ออกจากหน้านี้)
         return () => clearInterval(interval);
     }, []);
 
@@ -20,13 +18,11 @@ const WaitingScreen = () => {
         <View style={styles.container}>
             <ActivityIndicator size="large" color="#007bff" />
             
-            {/* ✅ Changed: เปลี่ยนมาใช้ userInfo.username แทน displayName */}
             <Text style={styles.title}>Hello, {userInfo?.username}!</Text>
             
             <Text style={styles.text}>Please wait for an Admin to assign your meal plan.</Text>
             <Text style={styles.text}>This screen will update automatically.</Text>
             
-            {/* ✅ New: เพิ่มปุ่ม Logout เพื่อให้ผู้ใช้สามารถออกจากระบบได้ */}
             <View style={styles.logoutButton}>
                 <Button title="Logout" onPress={logout} color="#888" />
             </View>

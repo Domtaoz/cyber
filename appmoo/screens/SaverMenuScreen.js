@@ -16,11 +16,9 @@ const SAVER_MENU_ITEMS = ['หมูสามชั้น', 'สันคอห�
 
 const SaverMenuScreen = ({ navigation }) => {
     const { userInfo, logout } = useContext(AuthContext);
-    // ✅ 1. เปลี่ยน State เป็น object เพื่อเก็บจำนวน
     const [order, setOrder] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ 2. สร้างฟังก์ชันสำหรับ เพิ่ม/ลด จำนวน
     const handleUpdateQuantity = (item, change) => {
         setOrder(prevOrder => {
             const currentQuantity = prevOrder[item] || 0;
@@ -29,7 +27,6 @@ const SaverMenuScreen = ({ navigation }) => {
             const newOrder = { ...prevOrder };
 
             if (newQuantity <= 0) {
-                // ถ้าจำนวนเป็น 0 หรือน้อยกว่า ให้ลบรายการนั้นออก
                 delete newOrder[item];
             } else {
                 newOrder[item] = newQuantity;
@@ -38,7 +35,6 @@ const SaverMenuScreen = ({ navigation }) => {
         });
     };
 
-    // ... (CREATE_ORDER_MUTATION เหมือนเดิม)
     const CREATE_ORDER_MUTATION = `
         mutation CreateOrder($userId: Int!, $itemNames: [String!]!) {
             createOrder(userId: $userId, itemNames: $itemNames) {
@@ -49,7 +45,6 @@ const SaverMenuScreen = ({ navigation }) => {
     `;
 
     const handleSubmitOrder = async () => {
-        // ✅ 3. แปลง object order เป็น array ของ string รูปแบบ "ชื่อ-จำนวน"
         const itemNames = Object.entries(order).map(([item, quantity]) => `${item}-${quantity}`);
 
         if (itemNames.length === 0) {
@@ -91,7 +86,6 @@ const SaverMenuScreen = ({ navigation }) => {
                 return (
                     <View key={index} style={styles.itemContainer}>
                         <Text style={styles.itemText}>{item}</Text>
-                        {/* ✅ 4. เปลี่ยน UI เป็นปุ่ม เพิ่ม/ลด */}
                         <View style={styles.quantityControl}>
                             <TouchableOpacity onPress={() => handleUpdateQuantity(item, -1)} style={styles.quantityButton}>
                                 <Text style={styles.quantityButtonText}>-</Text>
@@ -118,12 +112,10 @@ const SaverMenuScreen = ({ navigation }) => {
                 )}
             </View>
 
-            {/* ปุ่ม Logout ที่ Header (จากโค้ด AppNavigator) จะจัดการส่วนนี้ */}
         </ScrollView>
     );
 };
 
-// ✅ 5. อัปเดต Stylesheet
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
     header: { padding: 20, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#ddd' },

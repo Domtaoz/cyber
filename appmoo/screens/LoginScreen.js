@@ -1,19 +1,41 @@
 // screens/LoginScreen.js
 import React, { useState, useContext } from 'react'; // ✅ Import useContext
 import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { AuthContext } from '../AuthContext'; // ✅ Import AuthContext
+import { AuthContext, PasswordExpiredError } from '../AuthContext';
+import { postQuery } from '../api/client';
 
 const LoginScreen = ({ navigation }) => {
-    // ✅ Changed: เปลี่ยนชื่อ state เพื่อความชัดเจน
     const [loginIdentifier, setLoginIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    // ✅ Changed: ดึงฟังก์ชัน login มาจาก Context
     const { login } = useContext(AuthContext);
 
-    // ✅ Changed: ทำให้ handleLogin เรียกใช้ฟังก์ชันจาก Context
+    const handleForceResetPassword = async (email) => {
+        setLoading(true);
+        try {
+            const REQUEST_RESET_MUTATION = `
+                mutation RequestPasswordReset($email: String!) {
+                    requestPasswordReset(email: $email) { success, message }
+                }
+            `;
+            
+            await postQuery(REQUEST_RESET_MUTATION, { email });
+            
+            Alert.alert(
+                "Reset Code Sent",
+                "A password reset code has been sent to your email. Please check your inbox."
+            );
+            navigation.navigate('VerifyToken', { email });
+
+        } catch (apiError) {
+            Alert.alert('Error', 'Could not start the password reset process. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleLogin = async () => {
         if (!loginIdentifier || !password) {
             Alert.alert('Error', 'Please enter both username/email and password.');
@@ -22,9 +44,21 @@ const LoginScreen = ({ navigation }) => {
         setLoading(true);
         try {
             await login(loginIdentifier, password);
-            // การนำทางจะเกิดขึ้นอัตโนมัติโดย AppNavigator
         } catch (error) {
-            Alert.alert('Login Failed', error.message);
+            if (error instanceof PasswordExpiredError) {
+                Alert.alert(
+                    'Password Expired',
+                    'Your password has expired. You must reset it now to continue.',
+                    [
+                        {
+                            text: 'Reset Password',
+                            onPress: () => handleForceResetPassword(error.user.email),
+                        },
+                    ]
+                );
+            } else {
+                Alert.alert('Login Failed', error.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -38,7 +72,7 @@ const LoginScreen = ({ navigation }) => {
                 style={styles.input}
                 placeholder="Username or Email"
                 value={loginIdentifier}
-                onChangeText={setLoginIdentifier} // ✅ Changed
+                onChangeText={setLoginIdentifier}
                 autoCapitalize="none"
             />
             
@@ -48,14 +82,12 @@ const LoginScreen = ({ navigation }) => {
                     placeholder="Password"
                     value={password}
                     onChangeText={setPassword}
-                    // ✅ 3. ทำให้การซ่อน/แสดงผลขึ้นอยู่กับ State
                     secureTextEntry={!isPasswordVisible} 
                 />
                 <TouchableOpacity 
                     onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                     style={styles.toggleButton}
                 >
-                    {/* ✅ 4. เปลี่ยนข้อความตาม State */}
                     <Text>{isPasswordVisible ? 'Hide' : 'Show'}</Text>
                 </TouchableOpacity>
             </View>
@@ -79,7 +111,6 @@ const LoginScreen = ({ navigation }) => {
     );
 };
 
-// ... (StyleSheet เหมือนเดิม)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -111,13 +142,11 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         backgroundColor: '#fff',
     },
-    // Style สำหรับ TextInput รหัสผ่าน (เอาเส้นขอบออก)
     passwordInput: {
         flex: 1,
         height: 50,
         paddingHorizontal: 10,
     },
-    // Style สำหรับปุ่ม Show/Hide
     toggleButton: {
         padding: 10,
     },

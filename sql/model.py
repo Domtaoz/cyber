@@ -40,14 +40,13 @@ class User(Base):
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username}, role={self.role}, tier={self.tier})>"
 
-# ... LoginLog class (ไม่มีการเปลี่ยนแปลง)
 
 class LoginLog(Base):
     __tablename__ = 'login_logs'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     username_attempt = Column(String(255), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True) # Nullable because a failed login might not have a user_id
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True) 
     timestamp = Column(DateTime, nullable=False, default=func.now())
     is_success = Column(Boolean, nullable=False)
     ip_address = Column(String(50), nullable=True)
@@ -57,6 +56,5 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    # ❌ user_display_name ถูกลบออกแล้ว
     ordered_at = Column(DateTime, nullable=False, default=func.now())
     items = Column(JSON, nullable=False)
