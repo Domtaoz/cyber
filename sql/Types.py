@@ -6,8 +6,8 @@ from typing import Optional
 @strawberry.type
 class UserType:
     id: int
-    display_name: str
     username: str
+    email: str
     role: str  # ส่งเป็น string
     tier: str  # ส่งเป็น string
 

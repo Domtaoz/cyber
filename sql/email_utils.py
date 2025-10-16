@@ -4,28 +4,29 @@ from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
 
-# โหลดค่าจากไฟล์ .env
 load_dotenv()
 
 GMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 GMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
-def send_reset_email(recipient_email: str, magic_link: str):
+# 🔄 อัปเดตฟังก์ชันนี้
+def send_reset_email(recipient_email: str, token: str):
     if not GMAIL_ADDRESS or not GMAIL_PASSWORD:
         print("ERROR: Email credentials not set in .env file.")
-        return
+        raise ConnectionError("Email service is not configured.")
 
     msg = EmailMessage()
-    msg['Subject'] = 'Reset Your Mookrata App Password'
+    msg['Subject'] = 'Your Mookrata App Password Reset Code'
     msg['From'] = GMAIL_ADDRESS
     msg['To'] = recipient_email
     
-    # เนื้อหาอีเมล
+    # ✅ เปลี่ยนเนื้อหาอีเมล
     msg.set_content(f"""
     Hello,
 
-    We received a request to reset your password. Please click the link below to set a new password:
-    {magic_link}
+    Your password reset code is: {token}
+
+    This code will expire in 15 minutes.
 
     If you did not request a password reset, please ignore this email.
 
@@ -40,3 +41,4 @@ def send_reset_email(recipient_email: str, magic_link: str):
         print(f"Password reset email sent to {recipient_email}")
     except Exception as e:
         print(f"Failed to send email: {e}")
+        raise e

@@ -1,55 +1,83 @@
+// screens/RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-// ✅ 1. Import ฟังก์ชันสำหรับเรียก API
 import { postQuery } from '../api/client';
 
-const RegisterScreen = ({ navigation }) => {
-    const [displayName, setDisplayName] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false); // State สำหรับ loading indicator
+const validateEmail = (email) => {
+    // Regular Expression สำหรับตรวจสอบรูปแบบอีเมลพื้นฐาน
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+};
 
-    // ✅ 2. สร้าง GraphQL Mutation string
-    const ADD_USER_MUTATION = `
-        mutation AddUser($displayName: String!, $username: String!, $password: String!) {
-            registerCustomer(displayName: $displayName, username: $username, password: $password) {
-                id
-                username
-                displayName
+const RegisterScreen = ({ navigation }) => {
+    // ✅ Changed: ลบ displayName, เพิ่ม email
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
+    // ✅ Changed: อัปเดต Mutation ให้ถูกต้อง
+    const REGISTER_CUSTOMER_MUTATION = `
+        mutation RegisterCustomer($username: String!, $email: String!, $password: String!) {
+            registerCustomer(username: $username, email: $email, password: $password) {
+                success
+                message
+                user {
+                    id
+                    username
+                }
             }
         }
     `;
 
-    // ✅ 3. เปลี่ยน handleRegister ให้เป็น async function
     const handleRegister = async () => {
-        if (!displayName || !username || !password) {
+        // ✅ Changed: ตรวจสอบ field ทั้งหมด
+        if (password !== confirmPassword) {
+            Alert.alert('Registration Failed', 'Passwords do not match.');
+            return; // หยุดการทำงานทันที
+        }
+        
+        if (!username || !email || !password) {
             Alert.alert('Error', 'Please fill in all fields.');
             return;
         }
-        setLoading(true); // เริ่ม loading
+
+        if (!validateEmail(email)) {
+            Alert.alert('Invalid Email', 'Please enter a valid email address.');
+            return; // หยุดการทำงานถ้าอีเมลไม่ถูกต้อง
+        }
+
+        setLoading(true);
 
         try {
-            // ✅ 4. เรียก API
-            const result = await postQuery(ADD_USER_MUTATION, {
-                displayName,
+            // ✅ Changed: ส่งตัวแปรให้ครบ
+            const result = await postQuery(REGISTER_CUSTOMER_MUTATION, {
                 username,
+                email,
                 password,
             });
 
-            // ตรวจสอบ error จาก GraphQL
             if (result.errors) {
                 throw new Error(result.errors[0].message);
             }
 
-            console.log('Register Success:', result.data);
-            Alert.alert('Registration Success', `Account for ${result.data.addUser.username} has been created!`);
+            const response = result.data.registerCustomer;
+            if (!response.success) {
+                throw new Error(response.message);
+            }
+
+            console.log('Register Success:', response.user);
+            Alert.alert('Registration Success', `Account for ${response.user.username} has been created!`);
             navigation.navigate('Login');
 
         } catch (error) {
-            // ✅ 5. แสดงข้อผิดพลาด
             Alert.alert('Registration Failed', error.message);
         } finally {
-            setLoading(false); // หยุด loading
+            setLoading(false);
         }
     };
 
@@ -57,35 +85,63 @@ const RegisterScreen = ({ navigation }) => {
         <View style={styles.container}>
             <Text style={styles.title}>Create Account</Text>
 
+            {/* ❌ ลบช่อง Display Name */}
             <TextInput
                 style={styles.input}
-                placeholder="Display Name"
-                value={displayName}
-                onChangeText={setDisplayName}
-            />
-            
-            <TextInput
-                style={styles.input}
-                placeholder="Username (Email)"
+                placeholder="Username"
                 value={username}
                 onChangeText={setUsername}
+                autoCapitalize="none"
+            />
+            
+            {/* ✅ เพิ่มช่อง Email */}
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
             />
             
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!isPasswordVisible}
+                />
+                <TouchableOpacity 
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                    style={styles.toggleButton}
+                >
+                    <Text>{isPasswordVisible ? 'Hide' : 'Show'}</Text>
+                </TouchableOpacity>
+            </View>
+            
+            {/* ✅ 3. สร้าง View ครอบช่อง Confirm Password */}
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry={!isConfirmPasswordVisible}
+                />
+                <TouchableOpacity 
+                    onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                    style={styles.toggleButton}
+                >
+                    <Text>{isConfirmPasswordVisible ? 'Hide' : 'Show'}</Text>
+                </TouchableOpacity>
+            </View>
 
             <View style={styles.buttonContainer}>
                 {loading ? (
                     <ActivityIndicator size="large" color="#28a745" />
                 ) : (
-                    <Button title="Register" onPress={handleRegister} color="#28a745" />
+                    <Button title="Register" onPress={handleRegister} color="#28a74as" />
                 )}
             </View>
 
@@ -96,7 +152,6 @@ const RegisterScreen = ({ navigation }) => {
     );
 };
 
-// ... (StyleSheet เหมือนเดิม)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -119,10 +174,27 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#fff',
     },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+    },
+    passwordInput: {
+        flex: 1,
+        height: 50,
+        paddingHorizontal: 10,
+    },
+    toggleButton: {
+        padding: 10,
+    },
     buttonContainer: {
         marginTop: 10,
         marginBottom: 20,
-        height: 40, // เพิ่มความสูงเพื่อให้ ActivityIndicator แสดงผลได้ดี
+        height: 40,
         justifyContent: 'center',
     },
     switchText: {

@@ -1,65 +1,98 @@
-query {
-  getUsers {
-    id
-    displayName
-    username
-    profilePictureUrl
-  }
-}
-
-query {
-  getUserById(id: 1) {
-    id
-    displayName
-    username
-    profilePictureUrl
-  }
-}
-
-mutation {
-  addUser(displayName: "Alice", username: "alice123", password: "1234") {
-    id
-    displayName
-    username
-    profilePictureUrl
-  }
-}
-
-mutation {
-  updateUser(id: 1, displayName: "Alice Updated", username: "alice_new", password: "4321") {
-    id
-    displayName
-    username
-    profilePictureUrl
-  }
-}
-
-mutation {
-  updateUserAvatar(id: 1, profilePictureUrl: "https://example.com/new_avatar.jpg") {
-    id
-    displayName
-    username
-    profilePictureUrl
-  }
-}
-
-mutation {
-  deleteUser(id: 1)
-}
-
-mutation {
-  loginUser(username: "alice123", password: "1234") {
+mutation RegisterCustomer($username: String!, $email: String!, $password: String!) {
+  registerCustomer(username: $username, email: $email, password: $password) {
     success
     message
     user {
       id
-      displayName
       username
-      profilePictureUrl
+      email
+      role
+      tier
     }
   }
 }
 
-mutation {
-  logoutUser
+query CheckMyStatus($userId: Int!) {
+  checkMyStatus(userId: $userId) {
+    id
+    username
+    role
+    tier
+  }
+}
+
+mutation RegisterCustomer($username: String!, $email: String!, $password: String!) {
+  registerCustomer(username: $username, email: $email, password: $password) {
+    success
+    message
+    user {
+      id
+      username
+      email
+      role
+      tier
+    }
+  }
+}
+
+mutation UpdateUser($id: Int!, $username: String, $password: String) {
+  updateUser(id: $id, username: $username, password: $password) {
+    id
+    username
+  }
+}
+
+mutation LoginUser($loginIdentifier: String!, $password: String!) {
+  loginUser(loginIdentifier: $loginIdentifier, password: $password) {
+    success
+    message
+    user {
+      id
+      username
+      role
+      tier
+    }
+  }
+}
+
+mutation RequestPasswordReset($email: String!) {
+  requestPasswordReset(email: $email) {
+    success
+    message
+  }
+}
+
+mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword) {
+    success
+    message
+  }
+}
+
+mutation CreateAdmin($username: String!, $email: String!, $password: String!) {
+  createAdmin(username: $username, email: $email, password: $password) {
+    success
+    message
+    user {
+      id
+      username
+      role
+    }
+  }
+}
+
+mutation AssignTier($userId: Int!, $tierName: String!) {
+  assignTier(userId: $userId, tierName: $tierName) {
+    id
+    username
+    tier
+  }
+}
+
+mutation CreateOrder($userId: Int!, $itemNames: [String!]!) {
+  createOrder(userId: $userId, itemNames: $itemNames) {
+    id
+    orderedAt
+    items
+  }
 }

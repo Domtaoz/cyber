@@ -1,51 +1,28 @@
-import React, { useState } from 'react';
+// screens/LoginScreen.js
+import React, { useState, useContext } from 'react'; // ✅ Import useContext
 import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-// ✅ 1. Import
-import { postQuery } from '../api/client';
+import { AuthContext } from '../AuthContext'; // ✅ Import AuthContext
 
 const LoginScreen = ({ navigation }) => {
-    const [username, setUsername] = useState('');
+    // ✅ Changed: เปลี่ยนชื่อ state เพื่อความชัดเจน
+    const [loginIdentifier, setLoginIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    // ✅ 2. สร้าง GraphQL Mutation string สำหรับ Login
-    const LOGIN_USER_MUTATION = `
-        mutation LoginUser($username: String!, $password: String!) {
-            loginUser(username: $username, password: $password) {
-                success
-                message
-                user {
-                    id
-                    displayName
-                    username
-                }
-            }
-        }
-    `;
+    // ✅ Changed: ดึงฟังก์ชัน login มาจาก Context
+    const { login } = useContext(AuthContext);
 
-    // ✅ 3. เปลี่ยน handleLogin ให้เป็น async
+    // ✅ Changed: ทำให้ handleLogin เรียกใช้ฟังก์ชันจาก Context
     const handleLogin = async () => {
-        if (!username || !password) {
-            Alert.alert('Error', 'Please enter both username and password.');
+        if (!loginIdentifier || !password) {
+            Alert.alert('Error', 'Please enter both username/email and password.');
             return;
         }
         setLoading(true);
-
         try {
-            // ✅ 4. เรียก API
-            const result = await postQuery(LOGIN_USER_MUTATION, { username, password });
-            
-            const loginResponse = result.data.loginUser;
-
-            // ✅ 5. ตรวจสอบผลลัพธ์จาก Backend
-            if (loginResponse.success) {
-                Alert.alert('Login Success', `Welcome, ${loginResponse.user.displayName}!`);
-                // คุณสามารถนำทางไปยังหน้าหลักของแอปได้ที่นี่
-            } else {
-                // แสดง message จาก Backend หาก Login ไม่สำเร็จ
-                throw new Error(loginResponse.message);
-            }
-
+            await login(loginIdentifier, password);
+            // การนำทางจะเกิดขึ้นอัตโนมัติโดย AppNavigator
         } catch (error) {
             Alert.alert('Login Failed', error.message);
         } finally {
@@ -60,18 +37,28 @@ const LoginScreen = ({ navigation }) => {
             <TextInput
                 style={styles.input}
                 placeholder="Username or Email"
-                value={username}
-                onChangeText={setUsername}
+                value={loginIdentifier}
+                onChangeText={setLoginIdentifier} // ✅ Changed
                 autoCapitalize="none"
             />
             
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    // ✅ 3. ทำให้การซ่อน/แสดงผลขึ้นอยู่กับ State
+                    secureTextEntry={!isPasswordVisible} 
+                />
+                <TouchableOpacity 
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                    style={styles.toggleButton}
+                >
+                    {/* ✅ 4. เปลี่ยนข้อความตาม State */}
+                    <Text>{isPasswordVisible ? 'Hide' : 'Show'}</Text>
+                </TouchableOpacity>
+            </View>
 
             <View style={styles.buttonContainer}>
                  {loading ? (
@@ -80,6 +67,10 @@ const LoginScreen = ({ navigation }) => {
                     <Button title="Login" onPress={handleLogin} />
                  )}
             </View>
+
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                 <Text style={styles.switchText}>Don't have an account? Register</Text>
@@ -111,6 +102,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#fff',
     },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+    },
+    // Style สำหรับ TextInput รหัสผ่าน (เอาเส้นขอบออก)
+    passwordInput: {
+        flex: 1,
+        height: 50,
+        paddingHorizontal: 10,
+    },
+    // Style สำหรับปุ่ม Show/Hide
+    toggleButton: {
+        padding: 10,
+    },
     buttonContainer: {
         marginTop: 10,
         marginBottom: 20,
@@ -122,6 +132,11 @@ const styles = StyleSheet.create({
         color: 'blue',
         textAlign: 'center',
         textDecorationLine: 'underline',
+    },
+    forgotPasswordText: {
+        marginTop: 15,
+        color: '#555',
+        textAlign: 'center',
     },
 });
 

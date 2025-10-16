@@ -1,7 +1,7 @@
-// context/AuthContext.js (สร้างโฟลเดอร์ใหม่ชื่อ context)
+// context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { postQuery } from '../api/client'; // Reuse our api client
+import { postQuery } from './api/client';
 
 export const AuthContext = createContext();
 
@@ -10,21 +10,30 @@ export const AuthProvider = ({ children }) => {
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
 
-    const login = async (username, password) => {
+    const login = async (loginIdentifier, password) => {
         setIsLoading(true);
+        // ✅ Changed: อัปเดต Mutation ให้ตรงกับ Backend ล่าสุด
         const LOGIN_MUTATION = `
-            mutation LoginUser($username: String!, $password: String!) {
-                loginUser(username: $username, password: $password) {
-                    success, message, user { id, displayName, username, role, tier }
+            mutation LoginUser($loginIdentifier: String!, $password: String!) {
+                loginUser(loginIdentifier: $loginIdentifier, password: $password) {
+                    success
+                    message
+                    user {
+                        id
+                        username
+                        role
+                        tier
+                    }
                 }
             }
         `;
         try {
-            const result = await postQuery(LOGIN_MUTATION, { username, password });
+            const result = await postQuery(LOGIN_MUTATION, { loginIdentifier, password });
             const response = result.data.loginUser;
+
             if (response.success) {
                 setUserInfo(response.user);
-                setUserToken('dummy-token'); // ในระบบจริงควรใช้ JWT Token
+                setUserToken('dummy-token'); // ในระบบจริงควรใช้ JWT
                 await AsyncStorage.setItem('userInfo', JSON.stringify(response.user));
                 await AsyncStorage.setItem('userToken', 'dummy-token');
             } else {
@@ -51,7 +60,6 @@ export const AuthProvider = ({ children }) => {
             const result = await postQuery(CHECK_STATUS_QUERY, { userId: userInfo.id });
             const freshUserInfo = result.data.checkMyStatus;
             if (freshUserInfo && freshUserInfo.tier !== userInfo.tier) {
-                // Tier มีการเปลี่ยนแปลง! อัปเดต state
                 const updatedUserInfo = { ...userInfo, tier: freshUserInfo.tier };
                 setUserInfo(updatedUserInfo);
                 await AsyncStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));

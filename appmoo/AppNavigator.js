@@ -4,15 +4,18 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View } from 'react-native';
 
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from './AuthContext';
 
 // Import all screens
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import WaitingScreen from '../screens/WaitingScreen';
-import SaverMenuScreen from '../screens/SaverMenuScreen';
-import PremiumMenuScreen from '../screens/PremiumMenuScreen';
-import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import WaitingScreen from './screens/WaitingScreen';
+import SaverMenuScreen from './screens/SaverMenuScreen';
+import PremiumMenuScreen from './screens/PremiumMenuScreen';
+import AdminDashboardScreen from './screens/AdminDashboardScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import VerifyTokenScreen from './screens/VerifyTokenScreen'; // ✅ เพิ่ม
+import ResetPasswordScreen from './screens/ResetPasswordScreen';
 
 const Stack = createStackNavigator();
 
@@ -56,6 +59,9 @@ const AppNavigator = () => {
                     <>
                         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="Register" component={RegisterScreen} />
+                        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Forgot Password' }} />
+                        <Stack.Screen name="VerifyToken" component={VerifyTokenScreen} options={{ title: 'Enter Code' }} />
+                        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'Set New Password' }} />
                     </>
                 )}
             </Stack.Navigator>

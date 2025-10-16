@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
+import { View, Text, StyleSheet, ActivityIndicator, Button } from 'react-native';
+import { AuthContext } from '../AuthContext';
 
 const WaitingScreen = () => {
     const { checkStatus, userInfo, logout } = useContext(AuthContext);
@@ -12,17 +12,53 @@ const WaitingScreen = () => {
             checkStatus();
         }, 5000);
 
-        // Clear interval เมื่อ component ถูก unmount
+        // Clear interval เมื่อ component ถูก unmount (ออกจากหน้านี้)
         return () => clearInterval(interval);
     }, []);
 
     return (
         <View style={styles.container}>
-            <ActivityIndicator size="large" />
-            <Text style={styles.title}>Hello, {userInfo?.displayName}!</Text>
+            <ActivityIndicator size="large" color="#007bff" />
+            
+            {/* ✅ Changed: เปลี่ยนมาใช้ userInfo.username แทน displayName */}
+            <Text style={styles.title}>Hello, {userInfo?.username}!</Text>
+            
             <Text style={styles.text}>Please wait for an Admin to assign your meal plan.</Text>
             <Text style={styles.text}>This screen will update automatically.</Text>
+            
+            {/* ✅ New: เพิ่มปุ่ม Logout เพื่อให้ผู้ใช้สามารถออกจากระบบได้ */}
+            <View style={styles.logoutButton}>
+                <Button title="Logout" onPress={logout} color="#888" />
+            </View>
         </View>
     );
 };
-// ... styles
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#f5f5f5',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    text: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 5,
+    },
+    logoutButton: {
+        marginTop: 40,
+        width: '60%',
+    }
+});
+
+export default WaitingScreen;

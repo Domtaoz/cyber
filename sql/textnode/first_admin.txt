@@ -1,19 +1,38 @@
 INSERT INTO users (
-    display_name, 
     username, 
     email, 
     password, 
     role, 
     tier, 
     password_updated_at, 
-    created_at
+    created_at,
+    failed_login_attempts,
+    is_locked 
 ) VALUES (
-    'Default Admin',
     'admin',
-    'admin@yourapp.com',
-    '$2b$12$Ea.gL2GLS2m25Gv2TViVn.Y9oRN33OMsML4FEqAFk7fjsY5W/a02S', -- นี่คือ hash ของ 'AdminPassword123!'
+    'admin@aapp.com',
+    '$2b$12$Ea.gL2GLS2m25Gv2TViVn.Y9oRN33OMsML4FEqAFk7fjsY5W/a02S',
     'ADMIN',
     'PENDING',
     NOW(),
-    NOW()
+    NOW(),
+    0,
+    FALSE 
 );
+
+mutation CreateAdmin($username: String!, $email: String!, $password: String!) {
+  createAdmin(username: $username, email: $email, password: $password) {
+    success
+    message
+    user {
+      id
+      username
+      role
+    }
+  }
+}
+
+
+admin
+admin@yourapp.com
+AdminPassword123!
