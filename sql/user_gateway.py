@@ -22,6 +22,12 @@ PASSWORD_EXPIRY_DAYS = 90
 class UserGateway:
     
     @classmethod
+    def get_user_by_id(cls, user_id: int) -> Optional[User]:
+        with SessionLocal() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            return user
+    
+    @classmethod
     def login_user(cls, login_identifier: str, password: str) -> UserType:
         with SessionLocal() as db:
             user = db.query(User).filter(

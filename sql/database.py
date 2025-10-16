@@ -2,10 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from config import Config
 
-conf = Config("config.ini")
-db_config = conf.load_db_config()
+db_config = Config.load_db_config()
 
-DATABASE_URL = f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}/{db_config['database']}"
+DATABASE_URL = "mysql+mysqlconnector://root:123456@localhost:3306/cyber"
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
