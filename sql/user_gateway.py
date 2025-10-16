@@ -75,7 +75,13 @@ class UserGateway:
             db.commit()
             cls._log_login_attempt(db, login_identifier, is_success=True, user_id=user.id)
             
-            return user
+            return UserType(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                role=user.role.value,
+                tier=user.tier.value
+            )
     
     # --- Helper Methods ---
     @staticmethod
@@ -217,7 +223,7 @@ class UserGateway:
 
     # --- Admin Functions ---
     @classmethod
-    def assign_user_tier(cls, user_id: int, tier: UserTier) -> UserType: # 👈 เปลี่ยน return type เป็น UserType
+    def assign_user_tier(cls, user_id: int, tier: UserTier) -> UserType: 
         with SessionLocal() as db:
             user = db.query(User).filter(User.id == user_id).first()
             if not user:

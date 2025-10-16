@@ -7,7 +7,6 @@ const WaitingScreen = () => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            console.log('Checking user status...');
             checkStatus();
         }, 5000);
 

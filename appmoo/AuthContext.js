@@ -20,37 +20,48 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (loginIdentifier, password) => {
         setIsLoading(true);
-        const LOGIN_MUTATION = `
-            mutation LoginUser($loginIdentifier: String!, $password: String!) {
-                loginUser(loginIdentifier: $loginIdentifier, password: $password) {
-                    success
-                    message
-                    passwordExpired 
-                    user {
-                        id
-                        username
-                        email
-                        role
-                        tier
+        try {
+            const LOGIN_MUTATION = `
+                mutation LoginUser($loginIdentifier: String!, $password: String!) {
+                    loginUser(loginIdentifier: $loginIdentifier, password: $password) {
+                        success
+                        message
+                        passwordExpired 
+                        user {
+                            id
+                            username
+                            email
+                            role
+                            tier
+                        }
                     }
                 }
+            `;
+    
+            const result = await postQuery(LOGIN_MUTATION, { loginIdentifier, password });
+
+            console.log("--- Server Response ---");
+            console.log(JSON.stringify(result, null, 2));
+
+            const response = result.data.loginUser;
+    
+            if (response.passwordExpired) {
+                throw new PasswordExpiredError(response.message, response.user);
             }
-        `;
-
-        const result = await postQuery(LOGIN_MUTATION, { loginIdentifier, password });
-        const response = result.data.loginUser;
-
-        if (response.passwordExpired) {
-            throw new PasswordExpiredError(response.message, response.user);
-        }
-
-        if (response.success) {
-            setUserInfo(response.user);
-            setUserToken('dummy-token');
-            await AsyncStorage.setItem('userInfo', JSON.stringify(response.user));
-            await AsyncStorage.setItem('userToken', 'dummy-token');
-        } else {
-            throw new Error(response.message);
+    
+            if (response.success) {
+                setUserInfo(response.user);
+                setUserToken('dummy-token');
+                await AsyncStorage.setItem('userInfo', JSON.stringify(response.user));
+                await AsyncStorage.setItem('userToken', 'dummy-token');
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) { 
+            console.error("Login function failed:", error);
+            throw error; 
+        } finally {
+            setIsLoading(false);
         }
     };
 

@@ -38,6 +38,8 @@ const AdminDashboardScreen = () => {
             <Button title="Assign to SAVER" onPress={() => handleAssignTier('SAVER')} />
             <View style={{ marginVertical: 5 }} />
             <Button title="Assign to PREMIUM" onPress={() => handleAssignTier('PREMIUM')} color="green" />
+            <View style={{ marginVertical: 5 }} />
+            <Button title="Assign to PENDING" onPress={() => handleAssignTier('PENDING')} color="red" />
         </View>
     );
 };

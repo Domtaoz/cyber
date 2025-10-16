@@ -1,7 +1,7 @@
 # mutation.py
 import strawberry
 from Types import UserType, LoginResponse, StatusResponse, OrderType
-from user_gateway import UserGateway
+from user_gateway import UserGateway, PasswordExpiredError
 from model import UserTier
 from typing import Optional
 
@@ -11,14 +11,8 @@ class Mutation:
     def register_customer(self, username: str, email: str, password: str) -> LoginResponse:
         try:
             user = UserGateway.register_customer(username, email, password)
-            user_type = UserType(
-                id=user.id, 
-                username=user.username, 
-                email=user.email,
-                role=user.role.value,
-                tier=user.tier.value
-            )
-            return LoginResponse(success=True, message="Customer account created successfully", user=user_type)
+            
+            return LoginResponse(success=True, message="Customer account created successfully", user=user)
         except ValueError as e:
             return LoginResponse(success=False, message=str(e), user=None)
 
@@ -26,26 +20,31 @@ class Mutation:
     def create_admin(self, username: str, email: str, password: str) -> LoginResponse:
         try:
             admin_user = UserGateway.create_admin(username, email, password)
-            user_type = UserType(
-                id=admin_user.id,
-                username=admin_user.username,
-                email=admin_user.email,
-                role=admin_user.role.value,
-                tier=admin_user.tier.value
-            )
-            return LoginResponse(success=True, message="Admin account created successfully", user=user_type)
+            
+            return LoginResponse(success=True, message="Admin account created successfully", user=admin_user)
         except ValueError as e:
             return LoginResponse(success=False, message=str(e), user=None)
         
     @strawberry.mutation
-    def login_user(self, login_identifier: str, password: str) -> LoginResponse: 
+    def login_user(self, login_identifier: str, password: str) -> LoginResponse:
         try:
             user_type = UserGateway.login_user(login_identifier, password)
-            
             return LoginResponse(success=True, message="Login successful", user=user_type)
+        except PasswordExpiredError as e: 
+            user = e.user
+            user_type = UserType(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                role=user.role.value,
+                tier=user.tier.value
+            )
+            return LoginResponse(success=False, message=str(e), user=user_type, passwordExpired=True)
         except ValueError as e:
             return LoginResponse(success=False, message=str(e), user=None)
-
+        except Exception as e:
+            return LoginResponse(success=False, message=f"An unexpected error occurred: {e}", user=None)
+        
     @strawberry.mutation
     def request_password_reset(self, email: str) -> StatusResponse:
         try:
@@ -76,18 +75,9 @@ class Mutation:
     @strawberry.mutation
     def assign_tier(self, user_id: int, tier_name: str) -> Optional[UserType]:
         try:
-            # แปลง string จาก client เป็น Enum
             tier_enum = UserTier[tier_name.upper()]
-            user = UserGateway.assign_user_tier(user_id, tier_enum)
-            if user:
-                return UserType(
-                    id=user.id,
-                    username=user.username,
-                    email=user.email,
-                    role=user.role.value,
-                    tier=user.tier.value
-                )
-            return None
+            return UserGateway.assign_user_tier(user_id, tier_enum)
+            
         except KeyError:
             raise Exception("Invalid tier name provided.")
         
