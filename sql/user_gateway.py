@@ -88,6 +88,8 @@ class UserGateway:
             errors.append("Password must contain an uppercase letter (A-Z).")
         if not re.search(r"[0-9]", password):
             errors.append("Password must contain a number (0-9).")
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]", password):
+            errors.append("Password must contain a special character (e.g., !@#$%).")
         return errors
 
     # --- User Management ---
@@ -116,7 +118,25 @@ class UserGateway:
             db.refresh(new_user)
             return new_user
         
-    # ❗️สำคัญ: อย่าลืมอัปเดตฟังก์ชันอื่นๆ ที่มีการตั้งรหัสผ่านด้วย
+    @classmethod
+    def create_admin(cls, username: str, email: str, password: str) -> User:
+        # ... (โค้ดตรวจสอบความซับซ้อนรหัสผ่าน)
+        
+        hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode('utf-8')
+        with SessionLocal() as db:
+            if db.query(User).filter(or_(User.username == username, User.email == email)).first():
+                raise ValueError("Username or email already in use.")
+
+            new_admin = User(
+                username=username,
+                email=email,
+                password=hashed_pw,
+                role=UserRole.ADMIN # <-- บังคับ Role ที่นี่
+            )
+            db.add(new_admin)
+            db.commit()
+            db.refresh(new_admin)
+            return new_admin
     
     @staticmethod
     def _generate_short_token(length: int = 6) -> str:

@@ -1,6 +1,7 @@
 # Types.py
 import strawberry
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
 # ✅ New: เพิ่ม field ใหม่ๆ
 @strawberry.type
@@ -21,3 +22,9 @@ class LoginResponse:
 class StatusResponse:
     success: bool
     message: str
+    
+@strawberry.type
+class OrderType:
+    id: int
+    orderedAt: datetime
+    items: List[str]

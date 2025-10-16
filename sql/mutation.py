@@ -1,6 +1,6 @@
 # mutation.py
 import strawberry
-from Types import UserType, LoginResponse, StatusResponse
+from Types import UserType, LoginResponse, StatusResponse, OrderType
 from user_gateway import UserGateway
 from model import UserTier
 from typing import Optional
@@ -100,3 +100,17 @@ class Mutation:
         except KeyError:
             # ถ้า client ส่งชื่อ tier ที่ไม่มีอยู่จริง
             raise Exception("Invalid tier name provided.")
+        
+    @strawberry.mutation
+    def createOrder(self, userId: int, itemNames: list[str]) -> Optional[OrderType]:
+        try:
+            order = UserGateway.create_order(user_id=userId, item_names=itemNames)
+            if order:
+                return OrderType(
+                    id=order.id,
+                    orderedAt=order.ordered_at,
+                    items=order.items
+                )
+            return None
+        except Exception as e:
+            raise Exception(str(e))

@@ -7,21 +7,21 @@ INSERT INTO users (
     password_updated_at, 
     created_at,
     failed_login_attempts,
-    is_locked 
+    is_locked
 ) VALUES (
     'admin',
-    'admin@aapp.com',
-    '$2b$12$Ea.gL2GLS2m25Gv2TViVn.Y9oRN33OMsML4FEqAFk7fjsY5W/a02S',
+    'admin@yourapp.com',
+    '$2b$12$Z.8bO3dG5Jce3oV2z/u3ROsTf5v7.zR8.e.qW9sY.C.g1H2iJ3kL4', 
     'ADMIN',
     'PENDING',
     NOW(),
     NOW(),
     0,
-    FALSE 
+    FALSE
 );
 
-mutation CreateAdmin($username: String!, $email: String!, $password: String!) {
-  createAdmin(username: $username, email: $email, password: $password) {
+mutation {
+  createAdmin(username: "admin", email: "admin@yourapp.com", password: "Admin1#") {
     success
     message
     user {
@@ -32,7 +32,10 @@ mutation CreateAdmin($username: String!, $email: String!, $password: String!) {
   }
 }
 
-
 admin
 admin@yourapp.com
-AdminPassword123!
+Admin1#
+
+saverTest
+premiumTest
+123456tT#

@@ -1,5 +1,6 @@
 // navigation/AppNavigator.js (สร้างโฟลเดอร์ใหม่ชื่อ navigation)
 import React, { useContext } from 'react';
+import { Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View } from 'react-native';
@@ -14,13 +15,14 @@ import SaverMenuScreen from './screens/SaverMenuScreen';
 import PremiumMenuScreen from './screens/PremiumMenuScreen';
 import AdminDashboardScreen from './screens/AdminDashboardScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
-import VerifyTokenScreen from './screens/VerifyTokenScreen'; // ✅ เพิ่ม
+import VerifyTokenScreen from './screens/VerifyTokenScreen'; //
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
+import OrderConfirmationScreen from './screens/OrderConfirmationScreen';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-    const { isLoading, userToken, userInfo } = useContext(AuthContext);
+    const { isLoading, userToken, userInfo, logout } = useContext(AuthContext);
 
     if (isLoading) {
         return (
@@ -30,20 +32,48 @@ const AppNavigator = () => {
         );
     }
 
+    const LogoutButton = () => (
+        <Button
+            onPress={logout}
+            title="Logout"
+            color="#ff4757"
+        />
+    );
+
     const renderUserScreens = () => {
         if (!userInfo) return null;
 
         if (userInfo.role === 'ADMIN') {
-            return <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />;
+            return <Stack.Screen 
+                        name="AdminDashboard" 
+                        component={AdminDashboardScreen} 
+                        options={{ 
+                            title: 'Admin Dashboard',
+                            headerRight: () => <LogoutButton />,
+                            headerLeft: null, 
+                        }}
+                    />;
         }
         
         switch (userInfo.tier) {
             case 'PENDING':
-                return <Stack.Screen name="Waiting" component={WaitingScreen} options={{ headerLeft: null }} />;
+                return <Stack.Screen name="Waiting" component={WaitingScreen} options={{ headerShown: false }} />;
+             
             case 'SAVER':
-                return <Stack.Screen name="SaverMenu" component={SaverMenuScreen} />;
+                return (
+                    <>
+                        <Stack.Screen name="SaverMenu" component={SaverMenuScreen} options={{title: 'Saver Menu', headerRight: () => <LogoutButton />,headerLeft: null, }}/>
+                        <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} options={{ title: 'Order Summary' }} />
+                    </>
+                );
             case 'PREMIUM':
-                return <Stack.Screen name="PremiumMenu" component={PremiumMenuScreen} />;
+                return (
+                    <>
+                        <Stack.Screen  name="PremiumMenu" component={PremiumMenuScreen} options={{ title: 'Premium Menu',headerRight: () => <LogoutButton />,headerLeft: null,}}/>
+                        <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} options={{ title: 'Order Summary' }} />
+                    </>
+                );
+
             default:
                 // Fallback to login if something is wrong
                 return <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />;
